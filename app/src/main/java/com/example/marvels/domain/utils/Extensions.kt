@@ -5,6 +5,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.widget.ImageView
+import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
@@ -30,12 +31,13 @@ fun Context.isNetworkAvailable(): Boolean {
     return hasInternet
 }
 
-fun ImageView.setImage(context: Context,url :Any){
+@BindingAdapter("profileImage")
+fun setImage(imageView: ImageView, url: Any) {
     val options: RequestOptions = RequestOptions()
         .centerCrop().diskCacheStrategy(DiskCacheStrategy.RESOURCE)
         .placeholder(R.mipmap.ic_launcher_round).dontAnimate()
         .error(R.mipmap.ic_launcher)
 
-    Glide.with(context).load(url)
-        .apply(options).into(this)
+    Glide.with(imageView.context).load(url)
+        .apply(options).into(imageView)
 }

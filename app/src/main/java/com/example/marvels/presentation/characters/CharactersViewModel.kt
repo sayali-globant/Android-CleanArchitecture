@@ -14,23 +14,25 @@ import kotlinx.coroutines.cancel
 
 class CharactersViewModel constructor(private val getPostsUseCase: AvengerUseCase) : ViewModel() {
 
-    val postsData = MutableLiveData<AvengerCharacterResponse>()
-    val showProgressbar = MutableLiveData<Boolean>()
-    val messageData = MutableLiveData<String>()
+    val mCharactersData = MutableLiveData<AvengerCharacterResponse>()
+    val mShowProgressbar = MutableLiveData<Boolean>()
+    val mErrorData = MutableLiveData<String>()
 
     fun getCharactersList(charactersRequest: CharactersRequest) {
-        showProgressbar.value = true
-        getPostsUseCase.invoke(viewModelScope, charactersRequest, object :
-            UseCaseResponse<AvengerCharacterResponse> {
+        mShowProgressbar.value = true
+        getPostsUseCase.invoke(
+            viewModelScope, charactersRequest,
+            object :
+                UseCaseResponse<AvengerCharacterResponse> {
                 override fun onSuccess(result: AvengerCharacterResponse) {
                     Log.i(TAG, "result: $result")
-                    postsData.value = result
-                    showProgressbar.value = false
+                    mCharactersData.value = result
+                    mShowProgressbar.value = false
                 }
 
                 override fun onError(apiError: ApiError?) {
-                    messageData.value = apiError?.getErrorMessage()
-                    showProgressbar.value = false
+                    mErrorData.value = apiError?.getErrorMessage()
+                    mShowProgressbar.value = false
                 }
             },
         )

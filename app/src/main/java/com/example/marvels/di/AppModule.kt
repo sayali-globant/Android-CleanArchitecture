@@ -11,4 +11,8 @@ val AppModule = module {
     single { createGetPostsUseCase(get()) }
 
     single { createPostRepository(get()) }
+
+    //   single { createProgressBar(androidContext()) }
+
 }
+

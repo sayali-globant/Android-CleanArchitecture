@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,27 +16,29 @@ import com.example.marvels.common.listeners.OnActionListener
 import com.example.marvels.data.entity.AvengerCharacterResponse
 import com.example.marvels.data.entity.CharacterDetail
 import com.example.marvels.data.entity.request.CharactersRequest
+import com.example.marvels.databinding.FragmentCharactersBinding
 import com.example.marvels.domain.utils.isNetworkAvailable
 import com.example.marvels.presentation.MainActivity
 import com.example.marvels.presentation.base.BaseFragment
 import com.example.marvels.presentation.characterdetail.CharacterDetailFragment
-import kotlinx.android.synthetic.main.fragment_characters.*
 import org.koin.android.viewmodel.ext.android.viewModel
-
 
 class CharactersFragment : BaseFragment(), OnActionListener {
 
     private val mCharactersViewModel: CharactersViewModel by viewModel()
-   private var mCharactersAdapter: CharactersAdapter? = null
-    private var mView : View? = null
+    private var mCharactersAdapter: CharactersAdapter? = null
+    private var mView: View? = null
     private var mOffset = 0
+    private lateinit var mBinding: FragmentCharactersBinding
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
         if (mView == null) {
-            mView =  inflater.inflate(R.layout.fragment_characters, container, false)
+            mBinding =
+                DataBindingUtil.inflate(inflater, R.layout.fragment_characters, container, false)
+            mView = mBinding.root
         }
         return mView
     }
@@ -44,13 +47,15 @@ class CharactersFragment : BaseFragment(), OnActionListener {
         super.onActivityCreated(savedInstanceState)
         observers()
         setupUI()
-        callApi()
-
+        if (mOffset == 0) {
+            callApi()
+        }
     }
 
-    private fun callApi(){
+    private fun callApi() {
         if (requireActivity().isNetworkAvailable()) {
             mCharactersViewModel.getCharactersList(CharactersRequest(offset = mOffset))
+            mOffset++
         } else {
             Toast.makeText(
                 requireActivity(),
@@ -62,33 +67,43 @@ class CharactersFragment : BaseFragment(), OnActionListener {
 
     private fun setupUI() {
         if (mCharactersAdapter == null) {
-            recyclerViewCharacters.layoutManager = LinearLayoutManager(requireContext())
-            mCharactersAdapter = CharactersAdapter(arrayListOf(),this)
-            recyclerViewCharacters.addItemDecoration(
-                DividerItemDecoration(
-                    recyclerViewCharacters.context,
-                    (recyclerViewCharacters.layoutManager as LinearLayoutManager).orientation
+            mBinding.apply {
+                recyclerViewCharacters.layoutManager = LinearLayoutManager(requireContext())
+                mCharactersAdapter = CharactersAdapter(arrayListOf(), this@CharactersFragment)
+                recyclerViewCharacters.addItemDecoration(
+                    DividerItemDecoration(
+                        recyclerViewCharacters.context,
+                        (recyclerViewCharacters.layoutManager as LinearLayoutManager).orientation
+                    )
                 )
-            )
-            recyclerViewCharacters.adapter = mCharactersAdapter
+                recyclerViewCharacters.adapter = mCharactersAdapter
+            }
+
         }
     }
 
-    private fun observers(){
+    private fun observers() {
         with(mCharactersViewModel) {
-
-            postsData.observe(requireActivity(), Observer {
-                // activityPostsBinding.postsProgressBar.visibility = GONE
+            mCharactersData.observe(requireActivity(), Observer {
+                // mPrgressDialog.hide()
+                mBinding.progressCharacters.visibility = View.GONE
                 setData(it)
-                Log.d("","MY "+ it.status)
+                Log.d("", "MY " + it.status)
             })
 
-            messageData.observe(requireActivity(), Observer {
+            mErrorData.observe(requireActivity(), {
+                //  mPrgressDialog?.hide()
                 Toast.makeText(requireActivity(), it, LENGTH_LONG).show()
             })
 
-            showProgressbar.observe(requireActivity(), Observer { isVisible ->
-              //  progress_circular.visibility = if (isVisible) VISIBLE else GONE
+            mShowProgressbar.observe(requireActivity(), Observer { isVisible ->
+                if (isVisible) {
+                    mBinding.progressCharacters.visibility = View.VISIBLE
+                    // mPrgressDialog?.show()
+                } else {
+                    mBinding.progressCharacters.visibility = View.GONE
+                    //  mPrgressDialog?.hide()
+                }
             })
         }
     }
@@ -97,7 +112,6 @@ class CharactersFragment : BaseFragment(), OnActionListener {
         avengerCharacterResponse.mainData?.results?.let {
             renderList(it)
         }
-
     }
 
     private fun renderList(list: List<CharacterDetail>) {
@@ -106,17 +120,19 @@ class CharactersFragment : BaseFragment(), OnActionListener {
     }
 
     companion object {
-
         fun newInstance() = CharactersFragment()
     }
 
     override fun onActionListener(position: Int, type: Int, characterDetail: CharacterDetail) {
-        when(type){
+        when (type) {
             CharactersAdapter.ACTION_ITEM_CLICK -> {
-                (requireActivity() as MainActivity).replaceFragment(CharacterDetailFragment.newInstance(characterDetail))
+                (requireActivity() as MainActivity).replaceFragment(
+                    CharacterDetailFragment.newInstance(
+                        characterDetail
+                    )
+                )
             }
             CharactersAdapter.ACTION_LOAD_MORE -> {
-                mOffset++
                 callApi()
             }
         }

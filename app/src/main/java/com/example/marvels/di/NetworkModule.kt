@@ -1,15 +1,12 @@
 package com.example.marvels.di
 
-import android.app.ProgressDialog
-import android.content.Context
 import com.example.marvels.BuildConfig
 import com.example.marvels.data.repository.CharacterRepositoryImpl
-import com.example.marvels.data.service.AvengerService
 import com.example.marvels.data.repository.CharactersRepository
+import com.example.marvels.data.service.AvengerService
 import com.example.marvels.domain.usecase.AvengerUseCase
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
@@ -25,7 +22,6 @@ val NetworkModule = module {
 
     single { createOkHttpClient() }
 
-    single { createProgressBar(androidContext()) }
 
 
 }
@@ -59,6 +55,3 @@ fun createGetPostsUseCase(postsRepository: CharactersRepository): AvengerUseCase
     return AvengerUseCase(postsRepository)
 }
 
-fun createProgressBar(context : Context) {
-    ProgressDialog(context)
-}

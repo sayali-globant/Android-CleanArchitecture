@@ -4,19 +4,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
 import com.example.marvels.R
-import com.example.marvels.common.listeners.OnActionListener
 import com.example.marvels.data.entity.CharacterDetail
-import com.example.marvels.domain.utils.setImage
+import com.example.marvels.databinding.FragmentCharacterDetailBinding
 import com.example.marvels.presentation.base.BaseFragment
-import kotlinx.android.synthetic.main.fragment_character_detail.*
 
 
 class CharacterDetailFragment : BaseFragment() {
 
     private var mView: View? = null
     private var mCharacterDetail: CharacterDetail? = null
-
+    private lateinit var mBinding: FragmentCharacterDetailBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         getArgs()
@@ -34,7 +33,13 @@ class CharacterDetailFragment : BaseFragment() {
     ): View? {
         // Inflate the layout for this fragment
         if (mView == null) {
-            mView = inflater.inflate(R.layout.fragment_character_detail, container, false)
+            mBinding = DataBindingUtil.inflate(
+                inflater,
+                R.layout.fragment_character_detail,
+                container,
+                false
+            )
+            mView = mBinding.root
         }
         return mView
     }
@@ -47,14 +52,12 @@ class CharacterDetailFragment : BaseFragment() {
 
     private fun setupUI() {
         mCharacterDetail?.let {
-            it.thumbnail?.let { thumb ->
-                imageViewCharacterDetail.setImage(
-                    requireContext(),
-                    thumb.path + "." + thumb.extension
-                )
+            mBinding.apply {
+                it.thumbnail?.let { thumb ->
+                    imageUrl = thumb.path + "." + thumb.extension
+                }
+                character = it
             }
-            textViewCharacterDetailName.text = it.name
-            textViewCharacterDetailDescription.text = it.description
         }
     }
 
