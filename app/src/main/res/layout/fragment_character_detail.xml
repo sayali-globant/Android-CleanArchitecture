@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#eeecf1"
+        android:orientation="vertical">
+
+
+    <ImageView
+            android:id="@+id/imageViewCharacterDetail"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"/>
+
+
+    <TextView
+            android:id="@+id/textViewCharacterDetailName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:lineSpacingExtra="14sp"
+            android:textColor="#2b2b2b"
+            android:textSize="22sp"
+            tools:text="Lorem ipsum dolor" />
+
+
+    <TextView
+            android:id="@+id/textViewCharacterDetailDescription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:lineSpacingExtra="5sp"
+            android:textColor="#202020"
+            android:textSize="13sp"
+            tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor sed do eiusmod tempor aliquip ex ea. Lorem ipsum dds olor sit amet, consectetur adipiscing elit, sed do eiusmod tempor sed do eiusmod tempor aliquip ex ea." />
+
+
+</LinearLayout>
