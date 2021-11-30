@@ -1,6 +1,6 @@
 package com.example.marvels.common.listeners
 
-import com.example.marvels.data.entity.CharacterDetail
+import com.marvel.data.characters.model.CharacterDetail
 
 interface OnActionListener {
 

@@ -7,7 +7,7 @@
 
         <variable
             name="characterDetail"
-            type="com.example.marvels.data.entity.CharacterDetail" />
+            type="com.marvel.data.characters.model.CharacterDetail" />
 
         <variable
             name="imageUrl"

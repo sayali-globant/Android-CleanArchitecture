@@ -1,0 +1,62 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'kotlin-android-extensions'
+    id 'dagger.hilt.android.plugin'
+    id 'kotlin-kapt'
+
+}
+
+android {
+    compileSdk 31
+
+    defaultConfig {
+        minSdk 24
+        targetSdk 31
+        versionCode 1
+        versionName "1.0"
+        publishNonDefault true
+
+        buildConfigField 'String', 'PUBLIC_API_KEY', '"31e26d52ff4435ba649d341faf4a446d"'
+        buildConfigField 'String', 'PRIVATE_API_KEY', '"b1a8bade876ff0855e85b353bc50ab835f3ff170"'
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+
+    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation 'androidx.appcompat:appcompat:1.4.0'
+    implementation 'com.google.android.material:material:1.4.0'
+
+    testImplementation 'junit:junit:4.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.13.0'
+
+    // Networking
+    implementation "com.squareup.retrofit2:retrofit:2.9.0"
+    implementation "com.squareup.okhttp3:okhttp:4.8.1"
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.8.1'
+
+    // Hilt
+    implementation "com.google.dagger:hilt-android:$hiltVersion"
+    kapt "com.google.dagger:hilt-android-compiler:$hiltVersion"
+
+}

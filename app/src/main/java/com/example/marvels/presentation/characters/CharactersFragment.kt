@@ -8,24 +8,25 @@ import android.view.ViewGroup
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.marvels.R
 import com.example.marvels.common.listeners.OnActionListener
-import com.example.marvels.data.entity.AvengerCharacterResponse
-import com.example.marvels.data.entity.CharacterDetail
-import com.example.marvels.data.entity.request.CharactersRequest
 import com.example.marvels.databinding.FragmentCharactersBinding
-import com.example.marvels.domain.utils.isNetworkAvailable
 import com.example.marvels.presentation.MainActivity
 import com.example.marvels.presentation.base.BaseFragment
 import com.example.marvels.presentation.characterdetail.CharacterDetailFragment
-import org.koin.android.viewmodel.ext.android.viewModel
+import com.marvel.data.characters.model.CharacterDetail
+import com.marvel.data.characters.model.MarvelCharacterResponse
+import com.marvel.data.characters.model.request.CharactersRequest
+import com.marvel.mydomain.Status
+
 
 class CharactersFragment : BaseFragment(), OnActionListener {
 
-    private val mCharactersViewModel: CharactersViewModel by viewModel()
+    private val mCharactersViewModel: CharactersViewModel by activityViewModels()
     private var mCharactersAdapter: CharactersAdapter? = null
     private var mView: View? = null
     private var mOffset = 0
@@ -53,16 +54,12 @@ class CharactersFragment : BaseFragment(), OnActionListener {
     }
 
     private fun callApi() {
-        if (requireActivity().isNetworkAvailable()) {
-            mCharactersViewModel.getCharactersList(CharactersRequest(offset = mOffset))
-            mOffset++
-        } else {
-            Toast.makeText(
-                requireActivity(),
-                getString(R.string.no_internet_connection),
-                Toast.LENGTH_SHORT
-            ).show()
-        }
+        mCharactersViewModel.getCharactersList(
+            CharactersRequest(
+                offset = mOffset
+            )
+        )
+        mOffset++
     }
 
     private fun setupUI() {
@@ -84,31 +81,33 @@ class CharactersFragment : BaseFragment(), OnActionListener {
 
     private fun observers() {
         with(mCharactersViewModel) {
-            mCharactersData.observe(requireActivity(), Observer {
-                // mPrgressDialog.hide()
-                mBinding.progressCharacters.visibility = View.GONE
-                setData(it)
-                Log.d("", "MY " + it.status)
-            })
+            mCharactersResponse.observe(requireActivity(), Observer {
 
-            mErrorData.observe(requireActivity(), {
-                //  mPrgressDialog?.hide()
-                Toast.makeText(requireActivity(), it, LENGTH_LONG).show()
-            })
+                when (it.status) {
 
-            mShowProgressbar.observe(requireActivity(), Observer { isVisible ->
-                if (isVisible) {
-                    mBinding.progressCharacters.visibility = View.VISIBLE
-                    // mPrgressDialog?.show()
-                } else {
-                    mBinding.progressCharacters.visibility = View.GONE
-                    //  mPrgressDialog?.hide()
+                    Status.LOADING -> {
+                        mBinding.progressCharacters.visibility = View.VISIBLE
+                        mBinding.recyclerViewCharacters.visibility = View.GONE
+                    }
+
+                    Status.SUCCESS -> {
+                        mBinding.progressCharacters.visibility = View.GONE
+                        setData(it.data!!)
+                        mBinding.recyclerViewCharacters.visibility = View.VISIBLE
+                        Log.d("", "MY " + it.status)
+
+                    }
+
+                    Status.ERROR -> {
+                        Toast.makeText(requireActivity(), it.message, LENGTH_LONG).show()
+                        mBinding.progressCharacters.visibility = View.GONE
+                    }
                 }
             })
         }
     }
 
-    private fun setData(avengerCharacterResponse: AvengerCharacterResponse) {
+    private fun setData(avengerCharacterResponse: MarvelCharacterResponse) {
         avengerCharacterResponse.mainData?.results?.let {
             renderList(it)
         }

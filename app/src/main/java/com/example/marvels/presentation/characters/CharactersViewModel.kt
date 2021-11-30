@@ -1,41 +1,46 @@
 package com.example.marvels.presentation.characters
 
-import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.marvels.data.entity.AvengerCharacterResponse
-import com.example.marvels.data.entity.request.CharactersRequest
-import com.example.marvels.domain.usecase.AvengerUseCase
-import com.example.marvels.domain.usecase.base.UseCaseResponse
-import com.example.marvels.domain.utils.ApiError
+import com.example.marvels.domain.utils.NetworkHelper
+import com.marvel.data.characters.model.MarvelCharacterResponse
+import com.marvel.data.characters.model.request.CharactersRequest
+import com.marvel.mydomain.ApiState
+import com.marvel.mydomain.usecase.characters.GetCharactersUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
-class CharactersViewModel constructor(private val getPostsUseCase: AvengerUseCase) : ViewModel() {
+@HiltViewModel
+class CharactersViewModel @Inject constructor(
+    private val mGetCharactersUseCase: GetCharactersUseCase,
+    private val mNetworkHelper: NetworkHelper
+) : ViewModel() {
 
-    val mCharactersData = MutableLiveData<AvengerCharacterResponse>()
-    val mShowProgressbar = MutableLiveData<Boolean>()
-    val mErrorData = MutableLiveData<String>()
+    private val mCharactersData = MutableLiveData<ApiState<MarvelCharacterResponse>>()
+    val mCharactersResponse: LiveData<ApiState<MarvelCharacterResponse>>
+        get() = mCharactersData
 
-    fun getCharactersList(charactersRequest: CharactersRequest) {
-        mShowProgressbar.value = true
-        getPostsUseCase.invoke(
-            viewModelScope, charactersRequest,
-            object :
-                UseCaseResponse<AvengerCharacterResponse> {
-                override fun onSuccess(result: AvengerCharacterResponse) {
-                    Log.i(TAG, "result: $result")
-                    mCharactersData.value = result
-                    mShowProgressbar.value = false
+    internal fun getCharactersList(charactersRequest: CharactersRequest) {
+        viewModelScope.launch {
+            mCharactersData.postValue(ApiState.loading(null))
+            if (mNetworkHelper.isNetworkAvailable()) {
+                mGetCharactersUseCase.getCharacters(charactersRequest).let {
+                    if (it.isSuccessful) {
+                        mCharactersData.postValue(ApiState.success(it.body()))
+                    } else {
+                        mCharactersData.postValue(ApiState.error(it.errorBody().toString(), null))
+                    }
                 }
+            } else {
+                mCharactersData.postValue(ApiState.error("No internet connection", null))
+            }
+        }
 
-                override fun onError(apiError: ApiError?) {
-                    mErrorData.value = apiError?.getErrorMessage()
-                    mShowProgressbar.value = false
-                }
-            },
-        )
     }
 
     override fun onCleared() {

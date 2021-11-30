@@ -4,12 +4,10 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
-
 import com.example.marvels.R
-import com.example.marvels.common.AppConstants
 import com.example.marvels.common.listeners.OnActionListener
-import com.example.marvels.data.entity.CharacterDetail
 import com.example.marvels.databinding.ItemCharactersBinding
+import com.marvel.data.characters.model.CharacterDetail
 
 
 class CharactersAdapter(
@@ -32,13 +30,13 @@ class CharactersAdapter(
             binding.imageUrl =
                 characterDetail.thumbnail?.path + "." + characterDetail.thumbnail?.extension
 
-            if (adapterPosition == mResults.size - mPaginationStartsFromLast && AppConstants.PAGINATION_LIMIT <= mResults.size) {
-                mOnActionListener.onActionListener(
-                    adapterPosition,
-                    ACTION_LOAD_MORE,
-                    characterDetail
-                )
-            }
+            /*  if (adapterPosition == mResults.size - mPaginationStartsFromLast && PAGINATION_LIMIT <= mResults.size) {
+                  mOnActionListener.onActionListener(
+                      adapterPosition,
+                      ACTION_LOAD_MORE,
+                      characterDetail
+                  )
+              }*/
 
             binding.container.setOnClickListener {
                 mOnActionListener.onActionListener(

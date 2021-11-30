@@ -6,9 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import com.example.marvels.R
-import com.example.marvels.data.entity.CharacterDetail
 import com.example.marvels.databinding.FragmentCharacterDetailBinding
 import com.example.marvels.presentation.base.BaseFragment
+import com.marvel.data.characters.model.CharacterDetail
 
 
 class CharacterDetailFragment : BaseFragment() {
@@ -16,6 +16,7 @@ class CharacterDetailFragment : BaseFragment() {
     private var mView: View? = null
     private var mCharacterDetail: CharacterDetail? = null
     private lateinit var mBinding: FragmentCharacterDetailBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         getArgs()
