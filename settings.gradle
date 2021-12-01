@@ -8,5 +8,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = "My Avengers"
 include ':app'
-include ':mydata'
-include ':mydomain'
+include ':data'
+include ':domain'
