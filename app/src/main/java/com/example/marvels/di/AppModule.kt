@@ -4,8 +4,8 @@ import com.example.marvels.BuildConfig
 import com.marvel.data.characters.api.CharactersApiHelper
 import com.marvel.data.characters.api.CharactersApiHelperImpl
 import com.marvel.data.characters.api.CharactersApiService
-import com.marvel.mydomain.usecase.characters.GetCharactersUseCase
-import com.marvel.mydomain.usecase.characters.GetCharactersUseCaseImpl
+import com.marvel.domain.usecase.characters.GetCharactersUseCase
+import com.marvel.domain.usecase.characters.GetCharactersUseCaseImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -59,5 +59,6 @@ class AppModule {
     @Singleton
     fun provideCharacterUseCaseHelper(useCaseHelperImpl: GetCharactersUseCaseImpl): GetCharactersUseCase =
         useCaseHelperImpl
+
 
 }

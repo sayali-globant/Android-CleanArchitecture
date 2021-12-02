@@ -1,4 +1,4 @@
-package com.marvel.mydomain
+package com.marvel.domain
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.marvel.data.characters.model.CharacterDetail
@@ -7,8 +7,8 @@ import com.marvel.data.characters.model.MarvelCharacterResponse
 import com.marvel.data.characters.model.Thumbnail
 import com.marvel.data.characters.model.request.CharactersRequest
 import com.marvel.data.characters.repository.CharacterRepository
-import com.marvel.mydomain.usecase.characters.GetCharactersUseCase
-import com.marvel.mydomain.usecase.characters.GetCharactersUseCaseImpl
+import com.marvel.domain.usecase.characters.GetCharactersUseCase
+import com.marvel.domain.usecase.characters.GetCharactersUseCaseImpl
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi

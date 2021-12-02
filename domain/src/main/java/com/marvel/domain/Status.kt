@@ -1,4 +1,4 @@
-package com.marvel.mydomain
+package com.marvel.domain
 
 
 enum class Status {

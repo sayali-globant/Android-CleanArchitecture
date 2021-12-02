@@ -1,4 +1,4 @@
-package com.marvel.mydomain
+package com.marvel.domain
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

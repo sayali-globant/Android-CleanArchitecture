@@ -1,4 +1,4 @@
-package com.marvel.mydomain
+package com.marvel.domain
 
 
 // This data class is responsible to communicate the current state of Network call to UI.

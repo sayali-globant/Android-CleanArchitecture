@@ -1,5 +1,6 @@
 package com.example.marvels.presentation.characters
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,43 +10,45 @@ import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.marvels.R
 import com.example.marvels.common.listeners.OnActionListener
 import com.example.marvels.databinding.FragmentCharactersBinding
+import com.example.marvels.domain.utils.isNetworkAvailable
+import com.example.marvels.domain.utils.toast
 import com.example.marvels.presentation.MainActivity
 import com.example.marvels.presentation.base.BaseFragment
 import com.example.marvels.presentation.characterdetail.CharacterDetailFragment
 import com.marvel.data.characters.model.CharacterDetail
 import com.marvel.data.characters.model.MarvelCharacterResponse
 import com.marvel.data.characters.model.request.CharactersRequest
-import com.marvel.mydomain.Status
+import com.marvel.domain.Status
 
 
 class CharactersFragment : BaseFragment(), OnActionListener {
 
+    companion object {
+        fun newInstance() = CharactersFragment()
+    }
+
     private val mCharactersViewModel: CharactersViewModel by activityViewModels()
     private var mCharactersAdapter: CharactersAdapter? = null
-    private var mView: View? = null
     private var mOffset = 0
     private lateinit var mBinding: FragmentCharactersBinding
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        if (mView == null) {
-            mBinding =
-                DataBindingUtil.inflate(inflater, R.layout.fragment_characters, container, false)
-            mView = mBinding.root
-        }
-        return mView
+    ): View {
+        mBinding =
+            DataBindingUtil.inflate(inflater, R.layout.fragment_characters, container, false)
+
+        return mBinding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         observers()
         setupUI()
         if (mOffset == 0) {
@@ -53,13 +56,32 @@ class CharactersFragment : BaseFragment(), OnActionListener {
         }
     }
 
+    override fun onActionListener(position: Int, type: Int, characterDetail: CharacterDetail) {
+        when (type) {
+            CharactersAdapter.ACTION_ITEM_CLICK -> {
+                (requireActivity() as MainActivity).replaceFragment(
+                    CharacterDetailFragment.newInstance(
+                        characterDetail
+                    )
+                )
+            }
+            CharactersAdapter.ACTION_LOAD_MORE -> {
+                callApi()
+            }
+        }
+    }
+
     private fun callApi() {
-        mCharactersViewModel.getCharactersList(
-            CharactersRequest(
-                offset = mOffset
+        if (requireActivity().isNetworkAvailable()) {
+            mCharactersViewModel.getCharactersList(
+                CharactersRequest(
+                    offset = mOffset
+                )
             )
-        )
-        mOffset++
+            mOffset++
+        } else {
+            getString(R.string.no_internet).toast(requireContext())
+        }
     }
 
     private fun setupUI() {
@@ -81,7 +103,7 @@ class CharactersFragment : BaseFragment(), OnActionListener {
 
     private fun observers() {
         with(mCharactersViewModel) {
-            mCharactersResponse.observe(requireActivity(), Observer {
+            mCharactersResponse.observe(requireActivity(), {
 
                 when (it.status) {
 
@@ -113,27 +135,14 @@ class CharactersFragment : BaseFragment(), OnActionListener {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun renderList(list: List<CharacterDetail>) {
-        mCharactersAdapter?.addData(list)
-        mCharactersAdapter?.notifyDataSetChanged()
-    }
-
-    companion object {
-        fun newInstance() = CharactersFragment()
-    }
-
-    override fun onActionListener(position: Int, type: Int, characterDetail: CharacterDetail) {
-        when (type) {
-            CharactersAdapter.ACTION_ITEM_CLICK -> {
-                (requireActivity() as MainActivity).replaceFragment(
-                    CharacterDetailFragment.newInstance(
-                        characterDetail
-                    )
-                )
-            }
-            CharactersAdapter.ACTION_LOAD_MORE -> {
-                callApi()
-            }
+        mCharactersAdapter?.let {
+            it.addData(list)
+            it.notifyDataSetChanged()
         }
     }
+
+
+
 }

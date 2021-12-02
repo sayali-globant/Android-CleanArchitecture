@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         if (addToBackStack) {
             fragmentTransaction.addToBackStack(className)
         }
-        fragmentTransaction.replace(R.id.framelayout_main, fragment, className).commit()
+        fragmentTransaction.replace(R.id.frameLayoutMain, fragment, className).commit()
 
     }
 }

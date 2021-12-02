@@ -20,8 +20,6 @@ class CharactersAdapter(
         const val ACTION_ITEM_CLICK = 2
     }
 
-    private val mPaginationStartsFromLast = 2
-
     inner class DataViewHolder(private val binding: ItemCharactersBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
@@ -29,14 +27,6 @@ class CharactersAdapter(
             binding.characterDetail = characterDetail
             binding.imageUrl =
                 characterDetail.thumbnail?.path + "." + characterDetail.thumbnail?.extension
-
-            /*  if (adapterPosition == mResults.size - mPaginationStartsFromLast && PAGINATION_LIMIT <= mResults.size) {
-                  mOnActionListener.onActionListener(
-                      adapterPosition,
-                      ACTION_LOAD_MORE,
-                      characterDetail
-                  )
-              }*/
 
             binding.container.setOnClickListener {
                 mOnActionListener.onActionListener(

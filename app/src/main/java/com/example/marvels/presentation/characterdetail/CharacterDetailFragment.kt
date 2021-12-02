@@ -13,7 +13,17 @@ import com.marvel.data.characters.model.CharacterDetail
 
 class CharacterDetailFragment : BaseFragment() {
 
-    private var mView: View? = null
+    companion object {
+
+        private const val ARG_CHARACTER = "character"
+        fun newInstance(characterDetail: CharacterDetail) =
+            CharacterDetailFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable(ARG_CHARACTER, characterDetail)
+                }
+            }
+    }
+
     private var mCharacterDetail: CharacterDetail? = null
     private lateinit var mBinding: FragmentCharacterDetailBinding
 
@@ -22,34 +32,24 @@ class CharacterDetailFragment : BaseFragment() {
         getArgs()
     }
 
-    private fun getArgs() {
-        arguments?.let {
-            mCharacterDetail = it.getParcelable(ARG_CHARACTER)
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        if (mView == null) {
-            mBinding = DataBindingUtil.inflate(
-                inflater,
-                R.layout.fragment_character_detail,
-                container,
-                false
-            )
-            mView = mBinding.root
-        }
-        return mView
+    ): View {
+        mBinding = DataBindingUtil.inflate(
+            inflater,
+            R.layout.fragment_character_detail,
+            container,
+            false
+        )
+        return mBinding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         setupUI()
     }
-
 
     private fun setupUI() {
         mCharacterDetail?.let {
@@ -62,15 +62,11 @@ class CharacterDetailFragment : BaseFragment() {
         }
     }
 
-    companion object {
-
-        private const val ARG_CHARACTER = "character"
-        fun newInstance(characterDetail: CharacterDetail) =
-            CharacterDetailFragment().apply {
-                arguments = Bundle().apply {
-                    putParcelable(ARG_CHARACTER, characterDetail)
-                }
-            }
+    private fun getArgs() {
+        arguments?.let {
+            mCharacterDetail = it.getParcelable(ARG_CHARACTER)
+        }
     }
+
 
 }

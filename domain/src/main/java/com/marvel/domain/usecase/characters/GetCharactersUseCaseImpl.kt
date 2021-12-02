@@ -1,4 +1,4 @@
-package com.marvel.mydomain.usecase.characters
+package com.marvel.domain.usecase.characters
 
 import com.marvel.data.characters.model.request.CharactersRequest
 import com.marvel.data.characters.repository.CharacterRepository

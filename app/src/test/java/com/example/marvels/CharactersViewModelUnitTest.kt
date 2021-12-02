@@ -2,16 +2,14 @@ package com.example.marvels
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
-import com.example.marvels.domain.utils.NetworkHelper
 import com.example.marvels.presentation.characters.CharactersViewModel
-import com.marvel.data.TestCoroutinesRule
 import com.marvel.data.characters.model.CharacterDetail
 import com.marvel.data.characters.model.Data
 import com.marvel.data.characters.model.MarvelCharacterResponse
 import com.marvel.data.characters.model.Thumbnail
 import com.marvel.data.characters.model.request.CharactersRequest
-import com.marvel.mydomain.ApiState
-import com.marvel.mydomain.usecase.characters.GetCharactersUseCase
+import com.marvel.domain.ApiState
+import com.marvel.domain.usecase.characters.GetCharactersUseCase
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -40,9 +38,6 @@ class CharactersViewModelUnitTest {
 
     @Mock
     lateinit var mCharactersRequest: CharactersRequest
-
-    @Mock
-    private lateinit var mNetworkHelper: NetworkHelper
 
     @Mock
     private lateinit var mObserver: Observer<ApiState<MarvelCharacterResponse>>
@@ -89,7 +84,7 @@ class CharactersViewModelUnitTest {
             )
             val result = mUseCase.getCharacters(mCharactersRequest)
 
-            val charactersViewModel = CharactersViewModel(mUseCase, mNetworkHelper)
+            val charactersViewModel = CharactersViewModel(mUseCase)
             charactersViewModel.mCharactersResponse.observeForever(mObserver)
             charactersViewModel.getCharactersList(mCharactersRequest)
 
@@ -112,7 +107,7 @@ class CharactersViewModelUnitTest {
             )
             val result = mUseCase.getCharacters(mCharactersRequest)
 
-            val charactersViewModel = CharactersViewModel(mUseCase, mNetworkHelper)
+            val charactersViewModel = CharactersViewModel(mUseCase)
             charactersViewModel.mCharactersResponse.observeForever(mObserver)
             charactersViewModel.getCharactersList(mCharactersRequest)
 
@@ -121,5 +116,6 @@ class CharactersViewModelUnitTest {
             Assert.assertFalse(result.isSuccessful)
             Assert.assertEquals(result.errorBody(), responseBody)
         }
+
     }
 }

@@ -1,4 +1,4 @@
-package com.marvel.mydomain
+package com.marvel.domain
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -9,7 +9,7 @@ import org.junit.runners.model.Statement
 
 /*
     During the unit-test, it enables the main dispatcher to use TestCoroutineDispatcher.
-    After the test, it resets and cleasnup.
+    After the test, it resets and cleanup.
  */
 @ExperimentalCoroutinesApi
 class TestCoroutinesRule : TestRule {
