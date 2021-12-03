@@ -5,11 +5,14 @@ import com.marvel.data.utils.AppConstants
 import java.math.BigInteger
 import java.security.MessageDigest
 
-data class CharactersRequest(val ts : Long = System.currentTimeMillis(),
-                             val apiKey : String = BuildConfig.PUBLIC_API_KEY,
-                             val hashKey : String = getMd5(ts),
-                             var limit : Int = AppConstants.PAGINATION_LIMIT,
-                             var offset : Int = 1)
+data class CharactersRequest(
+    val ts: Long = System.currentTimeMillis(),
+    val apiKey: String = BuildConfig.PUBLIC_API_KEY,
+    val hashKey: String = getMd5(ts),
+    var limit: Int = AppConstants.PAGINATION_LIMIT,
+    var offset: Int = 1,
+    var id: String = "0"
+)
 
 
 fun getMd5(timestamp: Long): String {

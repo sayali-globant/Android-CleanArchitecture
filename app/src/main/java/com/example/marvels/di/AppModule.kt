@@ -4,8 +4,13 @@ import com.example.marvels.BuildConfig
 import com.marvel.data.characters.api.CharactersApiHelper
 import com.marvel.data.characters.api.CharactersApiHelperImpl
 import com.marvel.data.characters.api.CharactersApiService
+import com.marvel.data.details.api.CharacterDetailsApiHelper
+import com.marvel.data.details.api.CharacterDetailsApiHelperImpl
+import com.marvel.data.details.api.CharacterDetailsApiService
 import com.marvel.domain.usecase.characters.GetCharactersUseCase
 import com.marvel.domain.usecase.characters.GetCharactersUseCaseImpl
+import com.marvel.domain.usecase.details.GetCharacterDetailsUseCase
+import com.marvel.domain.usecase.details.GetCharacterDetailsUseCaseImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -58,6 +63,21 @@ class AppModule {
     @Provides
     @Singleton
     fun provideCharacterUseCaseHelper(useCaseHelperImpl: GetCharactersUseCaseImpl): GetCharactersUseCase =
+        useCaseHelperImpl
+
+    @Provides
+    @Singleton
+    fun provideDetailsApiService(retrofit: Retrofit) =
+        retrofit.create(CharacterDetailsApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideDetailsApiHelper(apiHelperImpl: CharacterDetailsApiHelperImpl): CharacterDetailsApiHelper =
+        apiHelperImpl
+
+    @Provides
+    @Singleton
+    fun provideDetailsUseCaseHelper(useCaseHelperImpl: GetCharacterDetailsUseCaseImpl): GetCharacterDetailsUseCase =
         useCaseHelperImpl
 
 

@@ -60,9 +60,7 @@ class CharactersFragment : BaseFragment(), OnActionListener {
         when (type) {
             CharactersAdapter.ACTION_ITEM_CLICK -> {
                 (requireActivity() as MainActivity).replaceFragment(
-                    CharacterDetailFragment.newInstance(
-                        characterDetail
-                    )
+                    CharacterDetailFragment.newInstance(characterDetail.id!!)
                 )
             }
             CharactersAdapter.ACTION_LOAD_MORE -> {
