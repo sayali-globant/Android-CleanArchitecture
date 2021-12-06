@@ -21,17 +21,6 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class CharacterDetailFragment : DialogFragment() {
 
-    companion object {
-
-        private const val ARG_CHARACTER_ID = "character_id"
-        fun newInstance(id: Int) =
-            CharacterDetailFragment().apply {
-                arguments = Bundle().apply {
-                    putInt(ARG_CHARACTER_ID, id)
-                }
-            }
-    }
-
     private val mCharactersDetailViewModel: CharacterDetailViewModel by activityViewModels()
     private val args by navArgs<CharacterDetailFragmentArgs>()
     private var mCharacterDetailId: Int? = null

@@ -12,6 +12,7 @@
         tools:layout="@layout/fragment_characters">
         <action
             android:id="@+id/toCharacterDetailsFragment"
+            app:restoreState="true"
             app:destination="@id/characterDetailsFragment" />
     </fragment>
     <dialog
