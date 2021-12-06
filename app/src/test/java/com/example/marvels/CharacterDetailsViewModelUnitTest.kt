@@ -1,22 +1,17 @@
 package com.example.marvels
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.Observer
 import com.example.marvels.presentation.characterdetail.CharacterDetailViewModel
-import com.marvel.data.characters.model.CharacterDetail
-import com.marvel.data.characters.model.Data
-import com.marvel.data.characters.model.MarvelCharacterResponse
-import com.marvel.data.characters.model.Thumbnail
-import com.marvel.data.characters.model.request.CharactersRequest
 import com.marvel.domain.ApiState
-import com.marvel.domain.usecase.details.GetCharacterDetailsUseCase
-import com.nhaarman.mockitokotlin2.verify
+import com.marvel.domain.model.CharacterModel
+import com.marvel.domain.model.CharacterThumbnail
+import com.marvel.domain.model.CharactersRequestModel
+import com.marvel.domain.usecase.details.GetCharacterDetailsUseCaseImpl
+import com.marvel.domain.usecase.repository.CharacterDetailsRepository
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.ResponseBody
-import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -24,7 +19,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.mockito.junit.MockitoJUnitRunner
-import retrofit2.Response
 
 
 @ExperimentalCoroutinesApi
@@ -38,28 +32,23 @@ class CharacterDetailsViewModelUnitTest {
     val mTestCoroutineRule = TestCoroutinesRule()
 
     @Mock
-    private lateinit var mObserver: Observer<ApiState<MarvelCharacterResponse>>
+    lateinit var getCharacterDetailsUseCase: GetCharacterDetailsUseCaseImpl
 
     @Mock
-    private lateinit var mUseCase: GetCharacterDetailsUseCase
+    lateinit var characterDetailsRepository: CharacterDetailsRepository
+
+    lateinit var charachtersViewModel: CharacterDetailViewModel
 
 
-    private var mCharaRequest = CharactersRequest(id = "1234")
+    private var mCharacterRequest = CharactersRequestModel(id = "1234")
 
-    private val mCharactersList = listOf(
-        CharacterDetail(
+    private val mCharacter =
+        CharacterModel(
             id = 1,
             name = "Iron Man",
             description = "Tony Stark",
-            thumbnail = Thumbnail("iron_man", "jpg")
+            thumbnail = CharacterThumbnail("iron_man", "jpg")
         )
-    )
-
-    private val mCharacterSuccessResponse = MarvelCharacterResponse(
-        code = 200,
-        status = "Ok",
-        mainData = Data(1, 20, 20, total = 100, results = mCharactersList)
-    )
 
     @Rule
     @JvmField
@@ -68,49 +57,37 @@ class CharacterDetailsViewModelUnitTest {
         statement
     }
 
+    @Before
+    fun start() {
+        getCharacterDetailsUseCase = GetCharacterDetailsUseCaseImpl(characterDetailsRepository)
+        charachtersViewModel =
+            CharacterDetailViewModel(getCharacterDetailsUseCase)
+    }
+
     @Test
     fun testApiGetCharacterDetails_Success() {
         mTestCoroutineRule.runBlockingTest {
-            whenever(mUseCase.getCharacterDetails(mCharaRequest)).thenReturn(
-                Response.success(
-                    mCharacterSuccessResponse
-                )
+            whenever(getCharacterDetailsUseCase.getCharacterDetails(mCharacterRequest)).thenReturn(
+                ApiState.success(mCharacter)
             )
-            val result = mUseCase.getCharacterDetails(mCharaRequest)
-
-            val detailsViewModel = CharacterDetailViewModel(mUseCase)
-            detailsViewModel.mCharacterDetails.observeForever(mObserver)
-            detailsViewModel.getCharacterDetails(mCharaRequest)
-
-            verify(mUseCase).getCharacterDetails(mCharaRequest)
-
-            Assert.assertTrue(result.isSuccessful)
-            Assert.assertEquals(mCharacterSuccessResponse, result.body())
+            val result = charachtersViewModel.getCharacterDetails(mCharacterRequest)
+            Assert.assertNotNull(result)
         }
     }
 
     @Test
     fun testApiGetCharacterDetails_Error() {
         mTestCoroutineRule.runBlockingTest {
-            val responseBody: ResponseBody =
-                "{}".toResponseBody("application/json".toMediaTypeOrNull())
-            whenever(mUseCase.getCharacterDetails(mCharaRequest)).thenReturn(
-                Response.error(
-                    401,
-                    responseBody
+
+
+            whenever(getCharacterDetailsUseCase.getCharacterDetails(mCharacterRequest)).thenReturn(
+                ApiState.error(
+                    "401", null
                 )
             )
+            val result = charachtersViewModel.getCharacterDetails(mCharacterRequest)
+            Assert.assertNotNull(result)
 
-            val result = mUseCase.getCharacterDetails(mCharaRequest)
-
-            val detailsViewModel = CharacterDetailViewModel(mUseCase)
-            detailsViewModel.mCharacterDetails.observeForever(mObserver)
-            detailsViewModel.getCharacterDetails(mCharaRequest)
-
-            verify(mUseCase).getCharacterDetails(mCharaRequest)
-
-            Assert.assertFalse(result.isSuccessful)
-            Assert.assertEquals(result.errorBody(), responseBody)
         }
     }
 }

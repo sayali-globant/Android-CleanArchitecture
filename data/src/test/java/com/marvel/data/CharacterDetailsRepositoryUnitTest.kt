@@ -1,25 +1,25 @@
 package com.marvel.data
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.marvel.data.characters.model.CharacterDetail
-import com.marvel.data.characters.model.Data
-import com.marvel.data.characters.model.MarvelCharacterResponse
-import com.marvel.data.characters.model.Thumbnail
 import com.marvel.data.characters.model.request.CharactersRequest
-import com.nhaarman.mockitokotlin2.verify
+import com.marvel.data.details.repository.CharacterDetailsRepositoryImpl
+import com.marvel.data.source.characterdetails.CharacterDetailsDataSource
+import com.marvel.domain.ApiState
+import com.marvel.domain.Status
+import com.marvel.domain.model.CharacterModel
+import com.marvel.domain.model.CharacterThumbnail
+import com.marvel.domain.model.CharactersRequestModel
+import com.marvel.domain.usecase.repository.CharacterDetailsRepository
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.ResponseBody
-import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
-import retrofit2.Response
 
 
 @ExperimentalCoroutinesApi
@@ -31,32 +31,27 @@ class CharacterDetailsRepositoryUnitTest {
     @get: Rule
     val mTestCoroutineScope = TestCoroutinesRule()
 
-    private lateinit var mApiHelper: CharacterDetailsApiHelper
 
-    private var mCharacterRequest = CharactersRequest(id = "1234")
+    private var mCharactersRequest = CharactersRequestModel(id = "1234")
 
     @Mock
-    lateinit var apiService: CharacterApiService
-
-    private val mCharactersList = listOf(
-        CharacterDetail(
-            id = 1,
-            name = "Iron Man",
-            description = "Tony Stark",
-            thumbnail = Thumbnail("iron_man", "jpg")
-        )
-    )
-
-    private val mCharacterSuccessResponse = MarvelCharacterResponse(
-        code = 200,
-        status = "Ok",
-        mainData = Data(1, 20, 20, total = 100, results = mCharactersList)
-    )
+    lateinit var mCharacterDetailsDataSource: CharacterDetailsDataSource
+    private lateinit var mCharacterDetailsRepository: CharacterDetailsRepository
 
     @Before
     fun setUp() {
-        mApiHelper = CharacterDetailsApiHelperImpl(apiService)
+        //Used for initiation of Mockk
+        mCharacterDetailsDataSource = Mockito.mock(CharacterDetailsDataSource::class.java)
+        mCharacterDetailsRepository = CharacterDetailsRepositoryImpl(mCharacterDetailsDataSource)
     }
+
+    private val mCharactersDetail = CharacterModel(
+        id = 1,
+        name = "Iron Man",
+        description = "Tony Stark",
+        thumbnail = CharacterThumbnail("iron_man", "jpg")
+    )
+
 
     @Rule
     @JvmField
@@ -67,55 +62,48 @@ class CharacterDetailsRepositoryUnitTest {
 
     @Test
     fun getCharacterDetails_Success() {
+
         mTestCoroutineScope.runBlockingTest {
             whenever(
-                apiService.getCharacterDetails(
-                    "1234",
-                    mCharacterRequest.apiKey,
-                    mCharacterRequest.ts,
-                    mCharacterRequest.hashKey
+                mCharacterDetailsDataSource.getCharacterDetails(
+                    CharactersRequest(
+                        mCharactersRequest.ts,
+                        mCharactersRequest.apiKey,
+                        mCharactersRequest.hashKey,
+                        mCharactersRequest.id
+                    )
                 )
-            ).thenReturn(Response.success(mCharacterSuccessResponse))
-            val result = mApiHelper.getCharacterDetails(mCharacterRequest)
-            verify(apiService).getCharacterDetails(
-                "1234",
-                mCharacterRequest.apiKey,
-                mCharacterRequest.ts,
-                mCharacterRequest.hashKey
+            ).thenReturn(
+                ApiState.success(
+                    mCharactersDetail
+                )
             )
-            val isSuccess = result.isSuccessful
-
-
-            Assert.assertTrue(isSuccess)
-            Assert.assertEquals(mCharacterSuccessResponse, result.body())
+            val result = mCharacterDetailsRepository.getCharacterDetails(mCharactersRequest)
+            Assert.assertTrue(result.status == Status.SUCCESS)
         }
     }
 
     @Test
     fun getCharacterDetails_Error() {
         mTestCoroutineScope.runBlockingTest {
-            val responseBody: ResponseBody =
-                "{}".toResponseBody("application/json".toMediaTypeOrNull())
-            whenever(
-                apiService.getCharacterDetails(
-                    "1234",
-                    mCharacterRequest.apiKey,
-                    mCharacterRequest.ts,
-                    mCharacterRequest.hashKey
+            mTestCoroutineScope.runBlockingTest {
+                whenever(
+                    mCharacterDetailsDataSource.getCharacterDetails(
+                        CharactersRequest(
+                            mCharactersRequest.ts,
+                            mCharactersRequest.apiKey,
+                            mCharactersRequest.hashKey,
+                            mCharactersRequest.id
+                        )
+                    )
+                ).thenReturn(
+                    ApiState.error(
+                        "401", null
+                    )
                 )
-            ).thenReturn(Response.error(401, responseBody))
-
-            val result = mApiHelper.getCharacterDetails(mCharacterRequest)
-
-            verify(apiService).getCharacterDetails(
-                "1234",
-                mCharacterRequest.apiKey,
-                mCharacterRequest.ts,
-                mCharacterRequest.hashKey
-            )
-
-            Assert.assertFalse(result.isSuccessful)
-            Assert.assertEquals(result.errorBody(), responseBody)
+                val result = mCharacterDetailsRepository.getCharacterDetails(mCharactersRequest)
+                Assert.assertTrue(result.status == Status.ERROR)
+            }
         }
     }
 }

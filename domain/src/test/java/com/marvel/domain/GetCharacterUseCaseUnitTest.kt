@@ -1,20 +1,15 @@
 package com.marvel.domain
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.marvel.data.characters.model.CharacterDetail
-import com.marvel.data.characters.model.Data
-import com.marvel.data.characters.model.MarvelCharacterResponse
-import com.marvel.data.characters.model.Thumbnail
-import com.marvel.data.characters.model.request.CharactersRequest
-import com.marvel.data.characters.repository.CharacterRepository
+import com.marvel.domain.model.CharacterModel
+import com.marvel.domain.model.CharacterThumbnail
+import com.marvel.domain.model.CharactersRequestModel
 import com.marvel.domain.usecase.characters.GetCharactersUseCase
 import com.marvel.domain.usecase.characters.GetCharactersUseCaseImpl
+import com.marvel.domain.usecase.repository.CharactersRepository
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.ResponseBody
-import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -22,7 +17,6 @@ import org.junit.Test
 import org.junit.rules.TestRule
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
-import retrofit2.Response
 
 //@RunWith(MockitoJUnitRunner::class)
 @ExperimentalCoroutinesApi
@@ -37,10 +31,10 @@ class GetCharacterUseCaseUnitTest {
     private lateinit var mCharacterUseCase: GetCharactersUseCase
 
     @Mock
-    lateinit var mCharacterRepository: CharacterRepository
+    lateinit var mCharacterRepository: CharactersRepository
 
     @Mock
-    private lateinit var mCharactersRequest: CharactersRequest
+    private lateinit var mCharactersRequest: CharactersRequestModel
 
 
     @Before
@@ -49,25 +43,20 @@ class GetCharacterUseCaseUnitTest {
     }
 
     private val mCharactersList = listOf(
-        CharacterDetail(
+        CharacterModel(
             id = 1,
             name = "Iron Man",
             description = "Tony Stark",
-            thumbnail = Thumbnail("iron_man", "jpg")
+            thumbnail = CharacterThumbnail("iron_man", "jpg")
         ),
-        CharacterDetail(
+        CharacterModel(
             id = 2,
             name = "Captain America",
             description = "Steve Rogers",
-            thumbnail = Thumbnail("captain_america", "jpg")
+            thumbnail = CharacterThumbnail("captain_america", "jpg")
         )
     )
 
-    private val mCharacterSuccessResponse = MarvelCharacterResponse(
-        code = 200,
-        status = "Ok",
-        mainData = Data(1, 20, 20, total = 100, results = mCharactersList)
-    )
 
     @Rule
     @JvmField
@@ -80,18 +69,18 @@ class GetCharacterUseCaseUnitTest {
     fun getCharacters_Success() {
         mTestCoroutineScope.runBlockingTest {
             whenever(mCharacterRepository.getCharacters(mCharactersRequest)).thenReturn(
-                Response.success(
-                    mCharacterSuccessResponse
+                ApiState.success(
+                    mCharactersList
                 )
             )
             val result = mCharacterUseCase.getCharacters(mCharactersRequest)
 
-            val isSuccess = result.isSuccessful
+            val isSuccess = result.status == Status.SUCCESS
 
             verify(mCharacterRepository).getCharacters(mCharactersRequest)
 
             Assert.assertTrue(isSuccess)
-            Assert.assertEquals(mCharactersList, result.body()?.mainData?.results)
+            Assert.assertEquals(mCharactersList, result.data)
 
         }
     }
@@ -99,21 +88,16 @@ class GetCharacterUseCaseUnitTest {
     @Test
     fun getCharacters_Error() {
         mTestCoroutineScope.runBlockingTest {
-            val responseBody: ResponseBody =
-                "{}".toResponseBody("application/json".toMediaTypeOrNull())
             whenever(mCharacterRepository.getCharacters(mCharactersRequest)).thenReturn(
-                Response.error(
-                    401,
-                    responseBody
-                )
+                ApiState.error("401", null)
             )
 
             val result = mCharacterUseCase.getCharacters(mCharactersRequest)
 
             verify(mCharacterRepository).getCharacters(mCharactersRequest)
 
-            Assert.assertFalse(result.isSuccessful)
-            Assert.assertEquals(null, result.body()?.mainData?.results)
+            Assert.assertFalse(result.status == Status.SUCCESS)
+            Assert.assertEquals(null, result.data)
         }
     }
 }

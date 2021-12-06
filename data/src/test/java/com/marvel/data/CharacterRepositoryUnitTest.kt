@@ -1,30 +1,29 @@
 package com.marvel.data
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.marvel.data.characters.api.CharactersApiHelper
-import com.marvel.data.characters.api.CharactersApiHelperImpl
-import com.marvel.data.characters.api.CharactersApiService
-import com.marvel.data.characters.model.CharacterDetail
-import com.marvel.data.characters.model.Data
-import com.marvel.data.characters.model.MarvelCharacterResponse
-import com.marvel.data.characters.model.Thumbnail
 import com.marvel.data.characters.model.request.CharactersRequest
-import com.nhaarman.mockitokotlin2.verify
+import com.marvel.data.characters.repository.CharacterRepositoryImpl
+import com.marvel.data.source.characterlist.CharactersDataSource
+import com.marvel.domain.ApiState
+import com.marvel.domain.Status
+import com.marvel.domain.model.CharacterModel
+import com.marvel.domain.model.CharacterThumbnail
+import com.marvel.domain.model.CharactersRequestModel
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.ResponseBody
-import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.junit.runner.RunWith
+import org.junit.runners.JUnit4
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
-import retrofit2.Response
 
 
+@RunWith(JUnit4::class)
 @ExperimentalCoroutinesApi
 class CharacterRepositoryUnitTest {
 
@@ -34,39 +33,50 @@ class CharacterRepositoryUnitTest {
     @get: Rule
     val mTestCoroutineScope = TestCoroutinesRule()
 
-    private lateinit var mApiHelper: CharactersApiHelper
+
+    private var mCharactersRequest = CharactersRequestModel()
+
+    /* @MockK
+     lateinit var characterListDataSource: CharacterListDataSource
+     private lateinit var characterListRepository: CharacterListRepositoryImpl
+ */
+    /*@Before
+    fun setUp() {
+        //Used for initiation of Mockk
+        characterListDataSource = Mockito.mock(CharacterListDataSource::class.java)
+        MockitoAnnotations.initMocks(this)
+        characterListRepository = CharacterListRepositoryImpl(characterListDataSource)
+    }*/
+
 
     @Mock
-    lateinit var mApiService: CharactersApiService
-
-    private val mCharactersList = listOf(
-        CharacterDetail(
-            id = 1,
-            name = "Iron Man",
-            description = "Tony Stark",
-            thumbnail = Thumbnail("iron_man", "jpg")
-        ),
-        CharacterDetail(
-            id = 2,
-            name = "Captain America",
-            description = "Steve Rogers",
-            thumbnail = Thumbnail("captain_america", "jpg")
-        )
-    )
-
-    private val mCharacterSuccessResponse = MarvelCharacterResponse(
-        code = 200,
-        status = "Ok",
-        mainData = Data(1, 20, 20, total = 100, results = mCharactersList)
-    )
+    lateinit var mCharacterListDataSource: CharactersDataSource
+    private lateinit var mCharacterListRepository: CharacterRepositoryImpl
 
     @Before
     fun setUp() {
-        mApiHelper = CharactersApiHelperImpl(mApiService)
+        //Used for initiation of Mockk
+        mCharacterListDataSource = Mockito.mock(CharactersDataSource::class.java)
+        MockitoAnnotations.initMocks(this)
+        mCharacterListRepository = CharacterRepositoryImpl(mCharacterListDataSource)
     }
 
-    @Mock
-    lateinit var mCharactersRequest: CharactersRequest
+
+    private val mCharactersList = listOf(
+        CharacterModel(
+            id = 1,
+            name = "Iron Man",
+            description = "Tony Stark",
+            thumbnail = CharacterThumbnail("iron_man", "jpg")
+        ),
+        CharacterModel(
+            id = 2,
+            name = "Captain America",
+            description = "Steve Rogers",
+            thumbnail = CharacterThumbnail("captain_america", "jpg")
+        )
+    )
+
 
     @Rule
     @JvmField
@@ -79,51 +89,43 @@ class CharacterRepositoryUnitTest {
     fun getCharacterSuccess() {
         mTestCoroutineScope.runBlockingTest {
             whenever(
-                mApiService.getMarvelCharacters(
-                    mCharactersRequest.ts,
-                    mCharactersRequest.apiKey,
-                    mCharactersRequest.hashKey
+                mCharacterListDataSource.getCharacters(
+                    CharactersRequest(
+                        mCharactersRequest.ts,
+                        mCharactersRequest.apiKey,
+                        mCharactersRequest.hashKey,
+                        mCharactersRequest.id
+                    )
                 )
-            ).thenReturn(Response.success(mCharacterSuccessResponse))
-
-            val result = mApiHelper.getCharacters(mCharactersRequest)
-
-            val isSuccess = result.isSuccessful
-
-            verify(mApiService).getMarvelCharacters(
-                mCharactersRequest.ts,
-                mCharactersRequest.apiKey,
-                mCharactersRequest.hashKey
+            ).thenReturn(
+                ApiState.success(
+                    mCharactersList
+                )
             )
-
-            Assert.assertTrue(isSuccess)
-            Assert.assertEquals(mCharactersList, result.body()?.mainData?.results)
+            val result = mCharacterListRepository.getCharacters(mCharactersRequest)
+            Assert.assertTrue(result.status == Status.SUCCESS)
         }
     }
 
     @Test
     fun getCharactersError() {
         mTestCoroutineScope.runBlockingTest {
-            val responseBody: ResponseBody =
-                "{}".toResponseBody("application/json".toMediaTypeOrNull())
             whenever(
-                mApiService.getMarvelCharacters(
-                    mCharactersRequest.ts,
-                    mCharactersRequest.apiKey,
-                    mCharactersRequest.hashKey
+                mCharacterListDataSource.getCharacters(
+                    CharactersRequest(
+                        mCharactersRequest.ts,
+                        mCharactersRequest.apiKey,
+                        mCharactersRequest.hashKey,
+                        mCharactersRequest.id
+                    )
                 )
-            ).thenReturn(Response.error(401, responseBody))
-
-            val result = mApiHelper.getCharacters(mCharactersRequest)
-
-            verify(mApiService).getMarvelCharacters(
-                mCharactersRequest.ts,
-                mCharactersRequest.apiKey,
-                mCharactersRequest.hashKey
+            ).thenReturn(
+                ApiState.error(
+                    "401", null
+                )
             )
-
-            Assert.assertFalse(result.isSuccessful)
-            Assert.assertEquals(null, result.body()?.mainData?.results)
+            val result = mCharacterListRepository.getCharacters(mCharactersRequest)
+            Assert.assertTrue(result.status == Status.ERROR)
         }
     }
 }
