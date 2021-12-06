@@ -6,19 +6,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.navArgs
 import com.example.marvels.R
 import com.example.marvels.databinding.FragmentCharacterDetailBinding
 import com.example.marvels.domain.utils.isNetworkAvailable
 import com.example.marvels.domain.utils.toast
-import com.example.marvels.presentation.base.BaseFragment
 import com.marvel.domain.Status
 import com.marvel.domain.model.CharacterModel
 import com.marvel.domain.model.CharactersRequestModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class CharacterDetailFragment : BaseFragment() {
+class CharacterDetailFragment : DialogFragment() {
 
     companion object {
 
@@ -32,12 +33,16 @@ class CharacterDetailFragment : BaseFragment() {
     }
 
     private val mCharactersDetailViewModel: CharacterDetailViewModel by activityViewModels()
-
+    private val args by navArgs<CharacterDetailFragmentArgs>()
     private var mCharacterDetailId: Int? = null
     private lateinit var mBinding: FragmentCharacterDetailBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setStyle(
+            STYLE_NORMAL,
+            R.style.FullScreenDialogStyle
+        )
         getArgs()
     }
 
@@ -52,6 +57,7 @@ class CharacterDetailFragment : BaseFragment() {
             container,
             false
         )
+
         return mBinding.root
     }
 
@@ -110,9 +116,7 @@ class CharacterDetailFragment : BaseFragment() {
     }
 
     private fun getArgs() {
-        arguments?.let {
-            mCharacterDetailId = it.getInt(ARG_CHARACTER_ID)
-        }
+        mCharacterDetailId = args.characterId
     }
 
 

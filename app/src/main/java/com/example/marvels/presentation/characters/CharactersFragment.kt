@@ -10,6 +10,7 @@ import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.marvels.R
@@ -17,9 +18,7 @@ import com.example.marvels.common.listeners.OnActionListener
 import com.example.marvels.databinding.FragmentCharactersBinding
 import com.example.marvels.domain.utils.isNetworkAvailable
 import com.example.marvels.domain.utils.toast
-import com.example.marvels.presentation.MainActivity
 import com.example.marvels.presentation.base.BaseFragment
-import com.example.marvels.presentation.characterdetail.CharacterDetailFragment
 import com.marvel.domain.Status
 import com.marvel.domain.model.CharacterModel
 import com.marvel.domain.model.CharactersRequestModel
@@ -28,20 +27,15 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class CharactersFragment : BaseFragment(), OnActionListener {
 
-    companion object {
-        fun newInstance() = CharactersFragment()
-    }
 
     private val mCharactersViewModel: CharactersViewModel by activityViewModels()
     private var mCharactersAdapter: CharactersAdapter? = null
-    private var mOffset = 0
     private lateinit var mBinding: FragmentCharactersBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (mOffset == 0) {
-            callApi()
-        }
+        callApi()
+        observers()
     }
 
     override fun onCreateView(
@@ -55,7 +49,6 @@ class CharactersFragment : BaseFragment(), OnActionListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        observers()
         setupUI()
 
     }
@@ -63,9 +56,9 @@ class CharactersFragment : BaseFragment(), OnActionListener {
     override fun onActionListener(position: Int, type: Int, characterDetail: CharacterModel) {
         when (type) {
             CharactersAdapter.ACTION_ITEM_CLICK -> {
-                (requireActivity() as MainActivity).addFragment(
-                    CharacterDetailFragment.newInstance(characterDetail.id!!)
-                )
+                val characterId = characterDetail.id!!
+                val direction = CharactersFragmentDirections.toCharacterDetailsFragment(characterId)
+                findNavController().navigate(direction)
             }
             CharactersAdapter.ACTION_LOAD_MORE -> {
                 callApi()
@@ -76,7 +69,6 @@ class CharactersFragment : BaseFragment(), OnActionListener {
     private fun callApi() {
         if (requireActivity().isNetworkAvailable()) {
             mCharactersViewModel.getCharactersList(CharactersRequestModel())
-            mOffset++
         } else {
             getString(R.string.no_internet).toast(requireContext())
         }

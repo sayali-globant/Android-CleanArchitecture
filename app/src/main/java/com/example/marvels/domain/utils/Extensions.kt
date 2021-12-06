@@ -6,10 +6,10 @@ import android.net.NetworkCapabilities
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.databinding.BindingAdapter
-import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.example.marvels.R
+import com.example.marvels.common.GlideApp
 
 
 @BindingAdapter("profileImage")
@@ -19,8 +19,7 @@ fun setImage(imageView: ImageView, url: Any?) {
         .placeholder(R.mipmap.ic_launcher_round).dontAnimate()
         .error(R.mipmap.ic_launcher)
 
-    Glide.with(imageView.context).load(url)
-        .apply(options).into(imageView)
+    GlideApp.with(imageView.context).load(url).apply(options).into(imageView)
 }
 
 
