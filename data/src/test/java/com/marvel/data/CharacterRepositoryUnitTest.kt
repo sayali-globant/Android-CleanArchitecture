@@ -36,18 +36,6 @@ class CharacterRepositoryUnitTest {
 
     private var mCharactersRequest = CharactersRequestModel()
 
-    /* @MockK
-     lateinit var characterListDataSource: CharacterListDataSource
-     private lateinit var characterListRepository: CharacterListRepositoryImpl
- */
-    /*@Before
-    fun setUp() {
-        //Used for initiation of Mockk
-        characterListDataSource = Mockito.mock(CharacterListDataSource::class.java)
-        MockitoAnnotations.initMocks(this)
-        characterListRepository = CharacterListRepositoryImpl(characterListDataSource)
-    }*/
-
 
     @Mock
     lateinit var mCharacterListDataSource: CharactersDataSource
@@ -57,7 +45,6 @@ class CharacterRepositoryUnitTest {
     fun setUp() {
         //Used for initiation of Mockk
         mCharacterListDataSource = Mockito.mock(CharactersDataSource::class.java)
-        MockitoAnnotations.initMocks(this)
         mCharacterListRepository = CharacterRepositoryImpl(mCharacterListDataSource)
     }
 
