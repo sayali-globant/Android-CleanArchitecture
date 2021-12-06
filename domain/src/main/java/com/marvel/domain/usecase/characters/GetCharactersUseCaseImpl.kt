@@ -1,13 +1,22 @@
 package com.marvel.domain.usecase.characters
 
-import com.marvel.data.characters.model.request.CharactersRequest
-import com.marvel.data.characters.repository.CharacterRepository
+import com.marvel.domain.model.CharactersRequestModel
+import com.marvel.domain.usecase.repository.CharactersRepository
 import javax.inject.Inject
 
 
 class GetCharactersUseCaseImpl @Inject constructor(
-    private val repository: CharacterRepository
+    private val repository: CharactersRepository
 ) : GetCharactersUseCase {
-    override suspend fun getCharacters(request: CharactersRequest) =
+
+    override suspend fun getCharacters(request: CharactersRequestModel) =
         repository.getCharacters(request)
+
 }
+
+/*class GetCharacterListUseCaseImpl @Inject constructor(private val characterListRepository: CharacterListRepository) :
+    GetCharacterListUseCase {
+    override suspend fun invoke(): Result<List<MarvelCharacter>> =
+        characterListRepository.getCharacters()
+}
+*/

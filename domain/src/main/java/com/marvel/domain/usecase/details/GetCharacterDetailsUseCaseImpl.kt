@@ -1,15 +1,14 @@
 package com.marvel.domain.usecase.details
 
-import com.marvel.data.characters.model.MarvelCharacterResponse
-import com.marvel.data.characters.model.request.CharactersRequest
-import com.marvel.data.details.repository.CharacterDetailsRepository
-import retrofit2.Response
+import com.marvel.domain.model.CharactersRequestModel
+import com.marvel.domain.usecase.repository.CharacterDetailsRepository
 import javax.inject.Inject
 
 
 class GetCharacterDetailsUseCaseImpl @Inject constructor(
     private val repository: CharacterDetailsRepository
 ) : GetCharacterDetailsUseCase {
-    override suspend fun getCharacterDetails(charactersRequest: CharactersRequest): Response<MarvelCharacterResponse> =
+    override suspend fun getCharacterDetails(charactersRequest: CharactersRequestModel) =
         repository.getCharacterDetails(charactersRequest)
 }
+

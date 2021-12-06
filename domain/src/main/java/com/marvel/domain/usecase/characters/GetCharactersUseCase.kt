@@ -1,10 +1,10 @@
 package com.marvel.domain.usecase.characters
 
-import com.marvel.data.characters.model.MarvelCharacterResponse
-import com.marvel.data.characters.model.request.CharactersRequest
-import retrofit2.Response
+import com.marvel.domain.ApiState
+import com.marvel.domain.model.CharacterModel
+import com.marvel.domain.model.CharactersRequestModel
 
 
 interface GetCharactersUseCase {
-    suspend fun getCharacters(request: CharactersRequest): Response<MarvelCharacterResponse>
+    suspend fun getCharacters(request: CharactersRequestModel): ApiState<List<CharacterModel>>
 }

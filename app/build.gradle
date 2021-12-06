@@ -4,6 +4,7 @@ plugins {
     id 'kotlin-android-extensions'
     id 'dagger.hilt.android.plugin'
     id 'kotlin-kapt'
+    id 'androidx.navigation.safeargs.kotlin'
 
 }
 
@@ -16,9 +17,6 @@ android {
         targetSdk 31
         versionCode 1
         versionName "1.0"
-        buildConfigField 'String', 'BASE_URL', '"https://gateway.marvel.com/v1/"'
-        buildConfigField 'String', 'PUBLIC_API_KEY', '"31e26d52ff4435ba649d341faf4a446d"'
-        buildConfigField 'String', 'PRIVATE_API_KEY', '"b1a8bade876ff0855e85b353bc50ab835f3ff170"'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
     }
@@ -87,6 +85,18 @@ dependencies {
     // Glide for image loading
     implementation 'com.github.bumptech.glide:glide:4.11.0'
 
+// Navigation components
+    implementation "androidx.navigation:navigation-fragment-ktx:2.3.5"
+    implementation "androidx.navigation:navigation-ui-ktx:2.3.5"
+
+    // Feature module Support
+    implementation("androidx.navigation:navigation-dynamic-features-fragment:2.3.5")
+
+    // Testing Navigation
+    androidTestImplementation("androidx.navigation:navigation-testing:2.3.5")
+
+    // Jetpack Compose Integration
+    implementation("androidx.navigation:navigation-compose:2.4.0-beta02")
 
     // Hilt
     implementation "com.google.dagger:hilt-android:$hiltVersion"

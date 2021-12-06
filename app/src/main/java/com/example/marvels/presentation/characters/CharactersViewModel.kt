@@ -4,9 +4,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.marvel.data.characters.model.MarvelCharacterResponse
-import com.marvel.data.characters.model.request.CharactersRequest
+
 import com.marvel.domain.ApiState
+import com.marvel.domain.model.CharacterModel
+import com.marvel.domain.model.CharactersRequestModel
 import com.marvel.domain.usecase.characters.GetCharactersUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.cancel
@@ -18,20 +19,20 @@ import javax.inject.Inject
 class CharactersViewModel @Inject constructor(private val mGetCharactersUseCase: GetCharactersUseCase) :
     ViewModel() {
 
-    private val mCharactersData = MutableLiveData<ApiState<MarvelCharacterResponse>>()
-    val mCharactersResponse: LiveData<ApiState<MarvelCharacterResponse>>
+    private val mCharactersData = MutableLiveData<ApiState<List<CharacterModel>>>()
+    val mCharactersResponse: LiveData<ApiState<List<CharacterModel>>>
         get() = mCharactersData
 
-    internal fun getCharactersList(charactersRequest: CharactersRequest) {
+    internal fun getCharactersList(charactersRequest: CharactersRequestModel) {
         viewModelScope.launch {
             mCharactersData.postValue(ApiState.loading(null))
             mGetCharactersUseCase.getCharacters(charactersRequest).let {
-                if (it.isSuccessful) {
-                        mCharactersData.postValue(ApiState.success(it.body()))
-                    } else {
-                        mCharactersData.postValue(ApiState.error(it.errorBody().toString(), null))
-                    }
+                if (it.data != null) {
+                    mCharactersData.postValue(ApiState.success(it.data))
+                } else {
+                    mCharactersData.postValue(ApiState.error(it.message.toString(), null))
                 }
+            }
         }
     }
 

@@ -12,11 +12,12 @@ import com.example.marvels.databinding.FragmentCharacterDetailBinding
 import com.example.marvels.domain.utils.isNetworkAvailable
 import com.example.marvels.domain.utils.toast
 import com.example.marvels.presentation.base.BaseFragment
-import com.marvel.data.characters.model.CharacterDetail
-import com.marvel.data.characters.model.request.CharactersRequest
 import com.marvel.domain.Status
+import com.marvel.domain.model.CharacterModel
+import com.marvel.domain.model.CharactersRequestModel
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class CharacterDetailFragment : BaseFragment() {
 
     companion object {
@@ -63,7 +64,7 @@ class CharacterDetailFragment : BaseFragment() {
     private fun callApi() {
         if (requireActivity().isNetworkAvailable()) {
             mCharactersDetailViewModel.getCharacterDetails(
-                CharactersRequest(id = mCharacterDetailId?.toString()!!)
+                CharactersRequestModel(id = mCharacterDetailId?.toString()!!)
             )
         } else {
             getString(R.string.no_internet).toast(requireContext())
@@ -83,7 +84,7 @@ class CharacterDetailFragment : BaseFragment() {
 
                     Status.SUCCESS -> {
                         mBinding.progressCharacterDetails.visibility = View.GONE
-                        setupUI(it.data?.mainData?.results?.get(0))
+                        setupUI(it.data)
                         Log.d("", "MY " + it.status)
 
                     }
@@ -97,7 +98,7 @@ class CharacterDetailFragment : BaseFragment() {
         }
     }
 
-    private fun setupUI(characterDetail: CharacterDetail?) {
+    private fun setupUI(characterDetail: CharacterModel?) {
         characterDetail?.let {
             mBinding.apply {
                 it.thumbnail?.let { thumb ->

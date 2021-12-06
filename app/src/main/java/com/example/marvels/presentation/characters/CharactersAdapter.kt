@@ -7,11 +7,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.marvels.R
 import com.example.marvels.common.listeners.OnActionListener
 import com.example.marvels.databinding.ItemCharactersBinding
-import com.marvel.data.characters.model.CharacterDetail
+import com.marvel.domain.model.CharacterModel
 
 
 class CharactersAdapter(
-    private val mResults: ArrayList<CharacterDetail>,
+    private val mResults: ArrayList<CharacterModel>,
     private val mOnActionListener: OnActionListener
 ) : RecyclerView.Adapter<CharactersAdapter.DataViewHolder>() {
 
@@ -23,7 +23,7 @@ class CharactersAdapter(
     inner class DataViewHolder(private val binding: ItemCharactersBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(characterDetail: CharacterDetail) {
+        fun bind(characterDetail: CharacterModel) {
             binding.characterDetail = characterDetail
             binding.imageUrl =
                 characterDetail.thumbnail?.path + "." + characterDetail.thumbnail?.extension
@@ -52,7 +52,7 @@ class CharactersAdapter(
         holder.bind(mResults[position])
     }
 
-    fun addData(list: List<CharacterDetail>) {
+    fun addData(list: List<CharacterModel>) {
         mResults.addAll(list)
     }
 }

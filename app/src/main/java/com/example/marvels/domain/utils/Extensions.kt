@@ -13,7 +13,7 @@ import com.example.marvels.R
 
 
 @BindingAdapter("profileImage")
-fun setImage(imageView: ImageView, url: Any) {
+fun setImage(imageView: ImageView, url: Any?) {
     val options: RequestOptions = RequestOptions()
         .centerCrop().diskCacheStrategy(DiskCacheStrategy.RESOURCE)
         .placeholder(R.mipmap.ic_launcher_round).dontAnimate()

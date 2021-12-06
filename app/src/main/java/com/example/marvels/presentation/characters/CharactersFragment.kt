@@ -20,12 +20,12 @@ import com.example.marvels.domain.utils.toast
 import com.example.marvels.presentation.MainActivity
 import com.example.marvels.presentation.base.BaseFragment
 import com.example.marvels.presentation.characterdetail.CharacterDetailFragment
-import com.marvel.data.characters.model.CharacterDetail
-import com.marvel.data.characters.model.MarvelCharacterResponse
-import com.marvel.data.characters.model.request.CharactersRequest
 import com.marvel.domain.Status
+import com.marvel.domain.model.CharacterModel
+import com.marvel.domain.model.CharactersRequestModel
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class CharactersFragment : BaseFragment(), OnActionListener {
 
     companion object {
@@ -37,13 +37,19 @@ class CharactersFragment : BaseFragment(), OnActionListener {
     private var mOffset = 0
     private lateinit var mBinding: FragmentCharactersBinding
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (mOffset == 0) {
+            callApi()
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         mBinding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_characters, container, false)
-
         return mBinding.root
     }
 
@@ -51,15 +57,13 @@ class CharactersFragment : BaseFragment(), OnActionListener {
         super.onViewCreated(view, savedInstanceState)
         observers()
         setupUI()
-        if (mOffset == 0) {
-            callApi()
-        }
+
     }
 
-    override fun onActionListener(position: Int, type: Int, characterDetail: CharacterDetail) {
+    override fun onActionListener(position: Int, type: Int, characterDetail: CharacterModel) {
         when (type) {
             CharactersAdapter.ACTION_ITEM_CLICK -> {
-                (requireActivity() as MainActivity).replaceFragment(
+                (requireActivity() as MainActivity).addFragment(
                     CharacterDetailFragment.newInstance(characterDetail.id!!)
                 )
             }
@@ -71,11 +75,7 @@ class CharactersFragment : BaseFragment(), OnActionListener {
 
     private fun callApi() {
         if (requireActivity().isNetworkAvailable()) {
-            mCharactersViewModel.getCharactersList(
-                CharactersRequest(
-                    offset = mOffset
-                )
-            )
+            mCharactersViewModel.getCharactersList(CharactersRequestModel())
             mOffset++
         } else {
             getString(R.string.no_internet).toast(requireContext())
@@ -112,7 +112,7 @@ class CharactersFragment : BaseFragment(), OnActionListener {
 
                     Status.SUCCESS -> {
                         mBinding.progressCharacters.visibility = View.GONE
-                        setData(it.data!!)
+                        setData(it.data)
                         mBinding.recyclerViewCharacters.visibility = View.VISIBLE
                         Log.d("", "MY " + it.status)
 
@@ -127,14 +127,14 @@ class CharactersFragment : BaseFragment(), OnActionListener {
         }
     }
 
-    private fun setData(avengerCharacterResponse: MarvelCharacterResponse) {
-        avengerCharacterResponse.mainData?.results?.let {
+    private fun setData(data: List<CharacterModel>?) {
+        data?.let {
             renderList(it)
         }
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private fun renderList(list: List<CharacterDetail>) {
+    private fun renderList(list: List<CharacterModel>) {
         mCharactersAdapter?.let {
             it.addData(list)
             it.notifyDataSetChanged()

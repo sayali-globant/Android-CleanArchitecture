@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun replaceFragment(fragment: Fragment?, addToBackStack: Boolean = true) {
+    private fun replaceFragment(fragment: Fragment?, addToBackStack: Boolean = true) {
         if (fragment == null) return
         val className = fragment.javaClass.name
 
@@ -28,6 +28,19 @@ class MainActivity : AppCompatActivity() {
             fragmentTransaction.addToBackStack(className)
         }
         fragmentTransaction.replace(R.id.frameLayoutMain, fragment, className).commit()
+
+    }
+
+    fun addFragment(fragment: Fragment?, addToBackStack: Boolean = true) {
+        if (fragment == null) return
+        val className = fragment.javaClass.name
+
+        val fragmentManager = supportFragmentManager
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        if (addToBackStack) {
+            fragmentTransaction.addToBackStack(className)
+        }
+        fragmentTransaction.add(R.id.frameLayoutMain, fragment, className).commit()
 
     }
 }
