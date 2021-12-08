@@ -13,6 +13,8 @@ buildscript {
     ext.mockitoVersion = '3.2.4'
     ext.hiltVersion = '2.38.1'
     ext.navigation_version="2.4.0-alpha02"
+    ext.glide_version = "4.11.0"
+    ext.jackson_annotation = "2.13.0"
     repositories {
         google()
         mavenCentral()

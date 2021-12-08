@@ -1,7 +1,6 @@
 package com.example.marvels.presentation.characterdetail
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,7 +22,7 @@ class CharacterDetailFragment : DialogFragment() {
 
     private val mCharactersDetailViewModel: CharacterDetailViewModel by activityViewModels()
     private val args by navArgs<CharacterDetailFragmentArgs>()
-    private var mCharacterDetailId: Int? = null
+    private var mCharacterDetailId: Int = 0
     private lateinit var mBinding: FragmentCharacterDetailBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,21 +51,21 @@ class CharacterDetailFragment : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        callApi()
-        observers()
+        fetchCharacterDetails()
+        setObservers()
     }
 
-    private fun callApi() {
+    private fun fetchCharacterDetails() {
         if (requireActivity().isNetworkAvailable()) {
             mCharactersDetailViewModel.getCharacterDetails(
-                CharactersRequestModel(id = mCharacterDetailId?.toString()!!)
+                CharactersRequestModel(id = mCharacterDetailId.toString())
             )
         } else {
             getString(R.string.no_internet).toast(requireContext())
         }
     }
 
-    private fun observers() {
+    private fun setObservers() {
         with(mCharactersDetailViewModel) {
             mCharacterDetails.observe(requireActivity(), {
 
@@ -80,8 +79,6 @@ class CharacterDetailFragment : DialogFragment() {
                     Status.SUCCESS -> {
                         mBinding.progressCharacterDetails.visibility = View.GONE
                         setupUI(it.data)
-                        Log.d("", "MY " + it.status)
-
                     }
 
                     Status.ERROR -> {

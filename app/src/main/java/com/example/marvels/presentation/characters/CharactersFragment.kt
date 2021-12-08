@@ -2,7 +2,6 @@ package com.example.marvels.presentation.characters
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,15 +26,14 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class CharactersFragment : BaseFragment(), OnActionListener {
 
-
     private val mCharactersViewModel: CharactersViewModel by activityViewModels()
     private var mCharactersAdapter: CharactersAdapter? = null
     private lateinit var mBinding: FragmentCharactersBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        callApi()
-        observers()
+        fetchCharacterList()
+        setObservers()
     }
 
     override fun onCreateView(
@@ -50,23 +48,22 @@ class CharactersFragment : BaseFragment(), OnActionListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupUI()
-
     }
 
     override fun onActionListener(position: Int, type: Int, characterDetail: CharacterModel) {
         when (type) {
             CharactersAdapter.ACTION_ITEM_CLICK -> {
-                val characterId = characterDetail.id!!
+                val characterId = characterDetail.id ?: 0
                 val direction = CharactersFragmentDirections.toCharacterDetailsFragment(characterId)
                 findNavController().navigate(direction)
             }
             CharactersAdapter.ACTION_LOAD_MORE -> {
-                callApi()
+                fetchCharacterList()
             }
         }
     }
 
-    private fun callApi() {
+    private fun fetchCharacterList() {
         if (requireActivity().isNetworkAvailable()) {
             mCharactersViewModel.getCharactersList(CharactersRequestModel())
         } else {
@@ -91,7 +88,7 @@ class CharactersFragment : BaseFragment(), OnActionListener {
         }
     }
 
-    private fun observers() {
+    private fun setObservers() {
         with(mCharactersViewModel) {
             mCharactersResponse.observe(requireActivity(), {
 
@@ -106,8 +103,6 @@ class CharactersFragment : BaseFragment(), OnActionListener {
                         mBinding.progressCharacters.visibility = View.GONE
                         setData(it.data)
                         mBinding.recyclerViewCharacters.visibility = View.VISIBLE
-                        Log.d("", "MY " + it.status)
-
                     }
 
                     Status.ERROR -> {
